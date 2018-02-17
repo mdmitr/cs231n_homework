@@ -34,14 +34,17 @@ def softmax_loss_naive(W, X, y, reg):
   for i in range(num_train):  
     scores = X[i].dot(W)
     correct_class_score = scores[y[i]] # its a number
-    scores = np.delete(scores, y[i]) # remove correct class score
-    loss += -correct_class_score + np.log(np.exp(scores).sum())
-    scores = X[i].dot(W)
+
+    # using this formula:
+    # L_i = f_yi + log(sum_over_j(e^{f_j})).
+
+    exp_scores_sum = np.exp(scores).sum()
+    loss += -correct_class_score + np.log(exp_scores_sum) 
     for j in range(num_classes):
         if (j == y[i]):
-          dW[:, y[i]] -= X[i]
+          dW[:, y[i]] += X[i].T * (-1 + np.exp(correct_class_score)/exp_scores_sum)
         else:
-          dW[:, j] += np.exp(scores[j]) / np.exp(scores).sum() * X[i]
+          dW[:, j] += X[i].T * np.exp(scores[j])/exp_scores_sum
       
   loss /= num_train
   loss += reg * np.sum(W * W)
@@ -73,16 +76,21 @@ def softmax_loss_vectorized(W, X, y, reg):
   num_train = X.shape[0]
   num_classes = W.shape[1]
   scores = X.dot(W)
+  exp_scores = np.exp(scores)
+  exp_scores_sum = exp_scores.sum(axis=1)
+
   correct_class_scores = scores[range(num_train), y]
+  loss = -correct_class_scores + np.log(exp_scores_sum)
+  loss = loss.sum()
 
-  scores[range(num_train), y] = -10000 # to remove correct scores from log
+  dW = exp_scores/exp_scores_sum.reshape(-1,1)
+  dW[range(num_train), y] += -1
+  dW = X.T.dot(dW)
 
-  loss = - correct_class_scores.sum() + np.log(np.exp(scores).sum(axis=1)).sum()
   loss /= num_train
   loss += reg * np.sum(W * W)
-
-
-  pass
+  dW /= num_train
+  dW += 2 * reg * W
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
