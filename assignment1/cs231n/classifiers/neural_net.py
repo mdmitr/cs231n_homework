@@ -113,7 +113,22 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
-    pass
+    # computing softmax derivation (https://stats.stackexchange.com/questions/273465/neural-network-softmax-activation)
+    exp_Z2 = np.exp(Z2)
+    dZ2 = exp_Z2/exp_Z2.sum(axis=1).reshape(-1,1)
+    dZ2[range(N), y] -= 1
+    dZ2 /= N
+  
+    grads['b2'] = dZ2.sum(axis=0)
+    grads['W2'] = A1.T.dot(dZ2) + 2*reg*W2
+
+    dA1 = dZ2.dot(W2.T)
+    dZ1 = dA1
+    dZ1[Z1 < 0] = 0
+
+    grads['b1'] = dZ1.sum(axis=0)
+    grads['W1'] = X.T.dot(dZ1) + 2*reg*W1
+
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
