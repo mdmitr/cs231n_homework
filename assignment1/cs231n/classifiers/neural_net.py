@@ -132,7 +132,6 @@ class TwoLayerNet(object):
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
-
     return loss, grads
 
   def train(self, X, y, X_val, y_val,
@@ -164,7 +163,7 @@ class TwoLayerNet(object):
     train_acc_history = []
     val_acc_history = []
 
-    for it in xrange(num_iters):
+    for it in range(num_iters):
       X_batch = None
       y_batch = None
 
@@ -172,7 +171,9 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      pass
+      random_idx = np.random.choice(num_train, batch_size)
+      X_batch = X[random_idx]
+      y_batch = y[random_idx]
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -187,7 +188,10 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      pass
+      self.params['W1'] -= learning_rate*grads['W1']
+      self.params['W2'] -= learning_rate*grads['W2']
+      self.params['b1'] -= learning_rate*grads['b1']
+      self.params['b2'] -= learning_rate*grads['b2']
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -232,7 +236,10 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
-    pass
+    Z1 = X.dot(self.params['W1']) + self.params['b1']
+    A1 = np.maximum(0, Z1)
+    Z2 = A1.dot(self.params['W2']) + self.params['b2']
+    y_pred = np.argmax(Z2, axis=1)
     ###########################################################################
     #                              END OF YOUR CODE                           #
     ###########################################################################
